@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://btq36ddpqmogh"]
+
+[ext_resource type="Script" uid="uid://cyvhwhne1wh8d" path="res://uploading_zone.gd" id="1_ko2w7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ae5ij"]
+albedo_color = Color(0.3515629, 0.3515629, 0.35156286, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ko2w7"]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_sjces"]
+data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xfp5k"]
+albedo_color = Color(0.2, 0.4627451, 0.2784314, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nc4rx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_myhtk"]
+size = Vector3(7.345703, 1, 7.437256)
+
+[node name="UploadingChunk" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(32, 0, 0, 0, 1, 0, 0, 0, 32, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_ae5ij")
+mesh = SubResource("BoxMesh_ko2w7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_sjces")
+
+[node name="uploadingZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.968428, 0, 0)
+script = ExtResource("1_ko2w7")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="uploadingZone"]
+transform = Transform3D(7.3257937, 0, 0, 0, 0.1993649, 0, 0, 0, 7.3962917, 0, 0.70040727, 0)
+material_override = SubResource("StandardMaterial3D_xfp5k")
+mesh = SubResource("BoxMesh_nc4rx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="uploadingZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.70040727, 0)
+shape = SubResource("BoxShape3D_myhtk")
+
+[connection signal="body_entered" from="uploadingZone" to="uploadingZone" method="_on_body_entered"]
+[connection signal="body_exited" from="uploadingZone" to="uploadingZone" method="_on_body_exited"]

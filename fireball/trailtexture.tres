@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dxlm52ww5m3t"]
+
+[ext_resource type="Shader" uid="uid://d13ya26mm387h" path="res://fireball/trailshader.tres" id="1_ki64w"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ki64w")
+shader_parameter/Speed = Vector2(0, -2)

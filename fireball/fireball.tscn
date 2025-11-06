@@ -1,0 +1,108 @@
+[gd_scene load_steps=19 format=3 uid="uid://bypa0nisadskw"]
+
+[ext_resource type="Shader" uid="uid://bg63t25pe5hug" path="res://fireball/fireball.tres" id="1_flm7g"]
+[ext_resource type="Shader" uid="uid://bdd8w0flxx2g6" path="res://fireball/Firehead.tres" id="2_ccdko"]
+[ext_resource type="Shader" uid="uid://d13ya26mm387h" path="res://fireball/trailshader.tres" id="3_gc2ye"]
+[ext_resource type="Script" uid="uid://cige3c6106ey1" path="res://fireball/Trail3D.gd" id="4_woylu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lqeb6"]
+render_priority = 1
+shader = ExtResource("1_flm7g")
+shader_parameter/Firecolor2 = Color(1.1897408, 0.7591507, 0.2253148, 1)
+shader_parameter/speed = Vector2(0, 0)
+
+[sub_resource type="Curve" id="Curve_ccdko"]
+_data = [Vector2(0, 0), 0.0, 6.142511, 0, 0, Vector2(0.36474162, 1), 0.13391282, 0.13391282, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="TubeTrailMesh" id="TubeTrailMesh_gc2ye"]
+radius = 0.2
+section_length = 0.1
+curve = SubResource("Curve_ccdko")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_woylu"]
+render_priority = 0
+shader = ExtResource("2_ccdko")
+shader_parameter/Ballcolor = Color(1, 0.62299365, 0.2456434, 1)
+shader_parameter/Fresnel = 0.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_lqeb6"]
+material = SubResource("ShaderMaterial_woylu")
+
+[sub_resource type="Curve" id="Curve_gc2ye"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_woylu"]
+curve = SubResource("Curve_gc2ye")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ccdko"]
+particle_flag_align_y = true
+emission_shape = 2
+emission_sphere_radius = 0.2
+direction = Vector3(0, -1, 0)
+spread = 0.0
+initial_velocity_min = 3.0
+initial_velocity_max = 8.0
+radial_velocity_min = 0.99997765
+radial_velocity_max = 1.9999776
+gravity = Vector3(0, 0, 0)
+scale_max = 1.5
+scale_curve = SubResource("CurveTexture_woylu")
+color = Color(1.3251904, 0.7553617, 0.31923693, 1)
+
+[sub_resource type="Gradient" id="Gradient_ccdko"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_gc2ye"]
+gradient = SubResource("Gradient_ccdko")
+width = 1024
+height = 1024
+use_hdr = true
+fill = 1
+fill_from = Vector2(0.517094, 0.51282054)
+fill_to = Vector2(0.7094017, 0.36324787)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ccdko"]
+blend_mode = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+albedo_texture = SubResource("GradientTexture2D_gc2ye")
+
+[sub_resource type="QuadMesh" id="QuadMesh_ccdko"]
+material = SubResource("StandardMaterial3D_ccdko")
+size = Vector2(0.185, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gc2ye"]
+render_priority = 0
+shader = ExtResource("3_gc2ye")
+shader_parameter/Speed = Vector2(0, 0)
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_gc2ye"]
+
+[node name="Fireflame" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+
+[node name="Fireball" type="MeshInstance3D" parent="."]
+material_override = SubResource("ShaderMaterial_lqeb6")
+mesh = SubResource("TubeTrailMesh_gc2ye")
+
+[node name="firehead" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.35, 0, 0, 0, 0.35000008, 3.4924597e-10, 0, -3.4924597e-10, 0.35000008, 0, 0.019669218, -9.406175e-05)
+mesh = SubResource("SphereMesh_lqeb6")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(-4.371139e-08, -0.004782138, -0.99998856, 0.004782138, 0.9999771, -0.0047820793, 0.99998856, -0.004782081, 2.2825117e-05, -0.080705404, -0.14597191, -0.036044385)
+amount = 10
+lifetime = 0.3
+explosiveness = 0.4
+process_material = SubResource("ParticleProcessMaterial_ccdko")
+draw_pass_1 = SubResource("QuadMesh_ccdko")
+
+[node name="Trail3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.32698873, 0, -7.296294e-08, 0, 1, 0, 2.8586262e-08, 0, -0.8345987, 0.027828097, 0.055949572, 0.06299547)
+material_override = SubResource("ShaderMaterial_gc2ye")
+mesh = SubResource("ImmediateMesh_gc2ye")
+script = ExtResource("4_woylu")

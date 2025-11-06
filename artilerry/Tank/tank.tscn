@@ -1,0 +1,191 @@
+[gd_scene load_steps=20 format=3 uid="uid://fg46ikyd2m5t"]
+
+[ext_resource type="Script" uid="uid://dd6g1oxq7s448" path="res://artilerry/Tank/tank.gd" id="1_24b0n"]
+[ext_resource type="PackedScene" uid="uid://r0865144f5kj" path="res://artilerry/Explosion/explosion.tscn" id="2_7rbtb"]
+[ext_resource type="Script" uid="uid://tra820eah0nk" path="res://artilerry/Tank/gun_direction.gd" id="3_7rbtb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_i3pt7"]
+size = Vector3(3.4560547, 0.6201172, 6.2226563)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7rbtb"]
+albedo_color = Color(0.49411765, 0.5529412, 0.60784316, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qpfm3"]
+material = SubResource("StandardMaterial3D_7rbtb")
+size = Vector3(3, 1, 5.5)
+
+[sub_resource type="TubeTrailMesh" id="TubeTrailMesh_i3pt7"]
+material = SubResource("StandardMaterial3D_7rbtb")
+radius = 1.5
+radial_steps = 5
+
+[sub_resource type="BoxMesh" id="BoxMesh_5e51w"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_a4smk"]
+top_radius = 0.1
+bottom_radius = 0.2
+height = 5.0
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_24b0n"]
+slide_on_slope = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_7rbtb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_24b0n"]
+albedo_color = Color(0.3328807, 0.33288068, 0.33288068, 1)
+
+[sub_resource type="TubeTrailMesh" id="TubeTrailMesh_7rbtb"]
+radial_steps = 15
+section_length = 0.6
+section_rings = 5
+
+[sub_resource type="Gradient" id="Gradient_1i4rc"]
+offsets = PackedFloat32Array(0.49174917, 0.5247525, 0.70957094)
+colors = PackedColorArray(0, 0, 0, 0, 0, 0.6784314, 0, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_sj2ax"]
+gradient = SubResource("Gradient_1i4rc")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_sj2ax"]
+offsets = PackedFloat32Array(0.9966997, 1)
+colors = PackedColorArray(1, 1, 1, 0, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_7rbtb"]
+gradient = SubResource("Gradient_sj2ax")
+width = 1050
+height = 900
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.63736266, 0.30769232)
+
+[sub_resource type="Gradient" id="Gradient_nbis8"]
+offsets = PackedFloat32Array(0.23762377, 0.38283828, 0.5181518, 0.5280528, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 0.8509804, 0.38039216, 1, 0.54901963, 0.54901963, 0.54901963, 0, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1i4rc"]
+gradient = SubResource("Gradient_nbis8")
+fill = 1
+fill_from = Vector2(0.4871795, 0.4957265)
+
+[node name="Tank" type="VehicleBody3D"]
+script = ExtResource("1_24b0n")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_i3pt7")
+
+[node name="body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8403505, 0)
+mesh = SubResource("BoxMesh_qpfm3")
+
+[node name="turret" type="MeshInstance3D" parent="body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.99840665, -0.07140255)
+mesh = SubResource("TubeTrailMesh_i3pt7")
+skeleton = NodePath("../..")
+
+[node name="barrel" type="Node3D" parent="body/turret"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.1255317)
+
+[node name="kazna" type="MeshInstance3D" parent="body/turret/barrel"]
+transform = Transform3D(1, 0, 0, 0, 0.8835399, 0, 0, 0, 0.49039355, 0, -0.01982522, 0.13267803)
+mesh = SubResource("BoxMesh_5e51w")
+skeleton = NodePath("../../../../..")
+
+[node name="Explosion" parent="body/turret/barrel/kazna" instance=ExtResource("2_7rbtb")]
+transform = Transform3D(0.9999997, 0, 0, 0, -4.9472995e-08, -1.1318103, 0, 2.0391777, -8.913529e-08, 0, 0.022438526, 10.733016)
+
+[node name="gun" type="MeshInstance3D" parent="body/turret/barrel/kazna"]
+transform = Transform3D(0.99999994, 0, 0, 0, -4.9473016e-08, -1.1318107, 0, 2.0391784, -8.913532e-08, 0, 0.022438526, 5.3611584)
+mesh = SubResource("CylinderMesh_a4smk")
+skeleton = NodePath("../../../../../..")
+
+[node name="spawn shell" type="Marker3D" parent="body/turret/barrel/kazna/gun"]
+transform = Transform3D(1, 0, 0, 0, 0.998347, -0.057476863, 0, 0.057476863, 0.998347, 0, 2.5028877, -1.1920929e-07)
+
+[node name="SightSpringArm" type="SpringArm3D" parent="body/turret/barrel/kazna/gun"]
+transform = Transform3D(1, 0, 1.6703743e-22, 1.6703743e-22, -4.371139e-08, 1, -7.301438e-30, -1, -4.371139e-08, 0.36437073, -2.089899, -0.19385362)
+collision_mask = 129
+shape = SubResource("SeparationRayShape3D_24b0n")
+spring_length = 500.0
+script = ExtResource("3_7rbtb")
+
+[node name="Marker3D" type="Marker3D" parent="body/turret/barrel/kazna/gun/SightSpringArm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3983637e-22, 0, 4.429165)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="body/turret/barrel/kazna/gun/SightSpringArm/Marker3D"]
+visible = false
+mesh = SubResource("SphereMesh_7rbtb")
+
+[node name="SightCamera" type="Camera3D" parent="body/turret/barrel"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.36321816, 0.19430768, 0.421216)
+fov = 37.2
+
+[node name="RegularCamera" type="Camera3D" parent="body/turret/barrel"]
+transform = Transform3D(-0.9998157, 0.019197455, 1.8516719e-08, 0.019042999, 0.9917714, 0.12659717, 0.002430325, 0.12657385, -0.9919542, 0.91156983, 1.407142, -1.4665651)
+current = true
+
+[node name="righttrack" type="MeshInstance3D" parent="body"]
+transform = Transform3D(-4.371139e-08, -0.309, 0, 1, -1.3506819e-08, 0, 0, 0, 5.426, -1.2860817, -0.6859697, 0)
+material_override = SubResource("StandardMaterial3D_24b0n")
+mesh = SubResource("TubeTrailMesh_7rbtb")
+skeleton = NodePath("../../right")
+
+[node name="lefttrack" type="MeshInstance3D" parent="body"]
+transform = Transform3D(-4.371139e-08, -0.309, 0, 1, -1.3506819e-08, 0, 0, 0, 5.426, 1.2504646, -0.6859697, 0)
+material_override = SubResource("StandardMaterial3D_24b0n")
+mesh = SubResource("TubeTrailMesh_7rbtb")
+skeleton = NodePath("../../right")
+
+[node name="right" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.3, 0, 0)
+use_as_traction = true
+
+[node name="left" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.3, 0, 0)
+use_as_traction = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="aim" type="TextureRect" parent="CanvasLayer"]
+offset_right = 64.0
+offset_bottom = 64.0
+scale = Vector2(0.335, 0.335)
+pivot_offset = Vector2(32, 32)
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_sj2ax")
+metadata/_edit_use_anchors_ = true
+
+[node name="sightaim" type="TextureRect" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -584.0
+offset_top = -450.0
+offset_right = 584.0
+offset_bottom = 450.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_7rbtb")
+stretch_mode = 6
+
+[node name="crosshair" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_1i4rc")
+metadata/_edit_use_anchors_ = true

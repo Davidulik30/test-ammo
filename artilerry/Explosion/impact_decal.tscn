@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcggf7x63akkc"]
+
+[ext_resource type="Texture2D" uid="uid://c48jkj75f6wnt" path="res://artilerry/Explosion/T_cracks35.png" id="1_wsg3n"]
+
+[node name="ImpactDecal_tscn" type="Decal"]
+transform = Transform3D(1, 0, -4.371139e-08, -4.371139e-08, 1.9106855e-15, -1, 0, 1, 1.9106855e-15, 0, 0, 0)
+size = Vector3(1, 1, 1)
+texture_albedo = ExtResource("1_wsg3n")

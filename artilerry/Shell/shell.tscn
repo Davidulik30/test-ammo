@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://dqbf3y40evl66"]
+
+[ext_resource type="Script" uid="uid://c25i2xb5fiagd" path="res://artilerry/Shell/shell.gd" id="1_bdwb8"]
+[ext_resource type="PackedScene" uid="uid://bypa0nisadskw" path="res://fireball/fireball.tscn" id="2_4238m"]
+
+[sub_resource type="Curve" id="Curve_cyrey"]
+_data = [Vector2(0.0021052659, 0.035000086), 0.0, 2.3749995, 0, 0, Vector2(0.36210528, 0.5150001), 0.0, 0.0, 0, 0, Vector2(1, 0.50632906), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bdwb8"]
+albedo_color = Color(0.8980392, 0.67058825, 0.29803923, 1)
+
+[sub_resource type="TubeTrailMesh" id="TubeTrailMesh_bdwb8"]
+material = SubResource("StandardMaterial3D_bdwb8")
+radius = 0.2
+curve = SubResource("Curve_cyrey")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7glmm"]
+radius = 0.24169922
+height = 1.0219727
+
+[node name="Shell" type="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
+center_of_mass_mode = 1
+contact_monitor = true
+max_contacts_reported = 1
+linear_velocity = Vector3(0, 5, 0)
+script = ExtResource("1_bdwb8")
+shell_type = 1
+speed = 50.0
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 0.3355115, 0)
+target_position = Vector3(0, 1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("TubeTrailMesh_bdwb8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9999921, 0, 0, 0, 0.9999921, 0, -0.09985443, 0)
+shape = SubResource("CapsuleShape3D_7glmm")
+
+[node name="Fireflame" parent="." instance=ExtResource("2_4238m")]
+transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 0.123295784, 0)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
