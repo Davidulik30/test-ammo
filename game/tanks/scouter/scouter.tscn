@@ -1,0 +1,138 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://game/tanks/tank.gd" id="1_tank"]
+[ext_resource type="PackedScene" path="res://game/effects/explosion.tscn" id="2_explosion"]
+[ext_resource type="Script" path="res://game/tanks/gun_direction.gd" id="3_gundir"]
+[ext_resource type="AudioStream" path="res://game/effects/tank_shot.mp3" id="4_shot"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_collision"]
+size = Vector3(2.5, 0.8, 4.5)
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_spring"]
+slide_on_slope = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.3, 0.35, 0.25, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_body"]
+material = SubResource("StandardMaterial3D_body")
+size = Vector3(2.2, 0.6, 4.0)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_turret"]
+material = SubResource("StandardMaterial3D_body")
+radius = 0.6
+height = 1.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+top_radius = 0.06
+bottom_radius = 0.1
+height = 3.0
+
+[sub_resource type="Gradient" id="Gradient_crosshair"]
+offsets = PackedFloat32Array(0.23762377, 0.38283828, 0.5181518, 0.5280528, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0, 1, 0.8509804, 0.38039216, 1, 0.54901963, 0.54901963, 0.54901963, 0, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_crosshair"]
+gradient = SubResource("Gradient_crosshair")
+fill = 1
+fill_from = Vector2(0.4871795, 0.4957265)
+
+[node name="Scouter" type="VehicleBody3D"]
+mass = 2000.0
+script = ExtResource("1_tank")
+engine_force_value = 350.0
+max_health = 60
+projectile_damage = 15
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+shape = SubResource("BoxShape3D_collision")
+
+[node name="body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_body")
+
+[node name="turret" type="MeshInstance3D" parent="body"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0.7, -0.3)
+mesh = SubResource("CapsuleMesh_turret")
+
+[node name="barrel" type="Node3D" parent="body/turret"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0.8)
+
+[node name="kazna" type="MeshInstance3D" parent="body/turret/barrel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Explosion" parent="body/turret/barrel/kazna" instance=ExtResource("2_explosion")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.5)
+
+[node name="gun" type="MeshInstance3D" parent="body/turret/barrel/kazna"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 1.5)
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="MuzzleAudio" type="AudioStreamPlayer3D" parent="body/turret/barrel/kazna"]
+stream = ExtResource("4_shot")
+bus = "SFX"
+unit_db = -3.0
+
+[node name="spawn shell" type="Marker3D" parent="body/turret/barrel/kazna/gun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+
+[node name="SightSpringArm" type="SpringArm3D" parent="body/turret/barrel/kazna/gun"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+collision_mask = 129
+shape = SubResource("SeparationRayShape3D_spring")
+spring_length = 500.0
+script = ExtResource("3_gundir")
+
+[node name="SightCamera" type="Camera3D" parent="body/turret/barrel"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.1, 0.3)
+fov = 50.0
+
+[node name="RegularCamera" type="Camera3D" parent="body/turret/barrel"]
+transform = Transform3D(-1, 0, 0, 0, 0.92, 0.39, 0, 0.39, -0.92, 0, 2.0, -3.0)
+current = true
+
+[node name="right" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3, 0, 0)
+wheel_radius = 0.35
+use_as_traction = true
+
+[node name="left" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 0, 0)
+wheel_radius = 0.35
+use_as_traction = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="aim" type="TextureRect" parent="CanvasLayer"]
+offset_right = 64.0
+offset_bottom = 64.0
+scale = Vector2(0.335, 0.335)
+pivot_offset = Vector2(32, 32)
+mouse_filter = 2
+
+[node name="sightaim" type="TextureRect" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -584.0
+offset_top = -450.0
+offset_right = 584.0
+offset_bottom = 450.0
+mouse_filter = 2
+stretch_mode = 6
+
+[node name="crosshair" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = SubResource("GradientTexture2D_crosshair")

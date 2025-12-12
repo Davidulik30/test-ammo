@@ -1,0 +1,36 @@
+[gd_scene load_steps=5 format=4 uid="uid://c4y6hlrgs3o5h"]
+
+[ext_resource type="Script" uid="uid://3bd8p5hkngua" path="res://lightning ability/line_mesh_generator.gd" id="1_k874g"]
+[ext_resource type="Material" uid="uid://b5wqxwh2rg72" path="res://lightning ability/lightning_material.tres" id="2_50ndb"]
+[ext_resource type="Script" uid="uid://bgpggve5xk8ns" path="res://lightning ability/LightningBolt.gd" id="3_lightning"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_f17cv"]
+_surfaces = [{
+"aabb": AABB(0, -0.895, 0, 4.775, 1.6010839, 1e-05),
+"attribute_data": PackedByteArray("AAAAAAAAgD8AAIA+AACAPwAAAAAAAAAAAACAPgAAAAAAAAA/AACAPwAAAD8AAAAAAABAPwAAgD8AAEA/AAAAAAAAgD8AAIA/AACAPwAAAAA="),
+"format": 34359742487,
+"index_count": 24,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAQAEAAMAAwAEAAUABAAGAAUABQAGAAcABgAIAAcABwAIAAkA"),
+"material": ExtResource("2_50ndb"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 10,
+"vertex_data": PackedByteArray("AAAAAAAAgD4AAAAAzcyYP+rBND8AAAAAAAAAAAAAgL4AAAAAzcyYP6YHUz4AAAAAzcwYQHA9yr4AAAAAzcwYQLgeZb8AAAAANDNlQOrBND8AAAAANDNlQKYHUz4AAAAAzcyYQAAAgD4AAAAAzcyYQAAAgL4AAAAA/3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AIA=")
+}]
+
+[node name="Lightning" type="Node3D"]
+script = ExtResource("3_lightning")
+auto_spawn = true
+
+[node name="LineGenerator" type="Node3D" parent="."]
+script = ExtResource("1_k874g")
+point_b = Vector3(4.775, 0, 0)
+segments = 4
+wave_count = 3
+wave_amplitude = 0.645
+mesh_material = ExtResource("2_50ndb")
+use_lightning_shader = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LineGenerator"]
+mesh = SubResource("ArrayMesh_f17cv")
+surface_material_override/0 = ExtResource("2_50ndb")

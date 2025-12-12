@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b5wqxwh2rg72"]
+
+[ext_resource type="Shader" uid="uid://bntjsjljgs6sh" path="res://lightning ability/lightning_shader.gdshader" id="1_uldjq"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_uldjq")
+shader_parameter/glow_intensity = 2.71600012901
+shader_parameter/pulse_speed = 5.0
+shader_parameter/flicker_intensity = 1.0
+shader_parameter/base_color = Color(1.214691, 0.3625564, 0.56914634, 1)
+shader_parameter/bright_color = Color(1, 1, 1, 1)
+shader_parameter/edge_glow = 1.7370000825075
+shader_parameter/branch_intensity = 0.58800002793
+shader_parameter/branch_width = 0.15
+shader_parameter/flow_speed = 9.85200046797
+shader_parameter/flow_width = 0.9570000454575

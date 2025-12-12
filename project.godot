@@ -10,24 +10,19 @@ config_version=5
 
 [application]
 
-config/name="TestAmmo"
-run/main_scene="uid://b6dw0de0c7b8t"
+config/name="TankBattle"
+run/main_scene="res://ui/lobby.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-MatchState="*res://lobby/match_state.gd"
-NetworkManager="*res://lobby/network_manager.gd"
+MatchState="*res://network/match_state.gd"
+NetworkManager="*res://network/network_manager.gd"
 
 [filesystem]
 
 import/blender/enabled=false
-
-[global_group]
-
-zones=""
-truck=""
 
 [input]
 

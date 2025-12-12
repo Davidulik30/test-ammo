@@ -1,0 +1,95 @@
+[gd_scene load_steps=15 format=3 uid="uid://b6dw0de0c7b8t"]
+
+[ext_resource type="Script" uid="uid://cxup8fw0oy83" path="res://game/maps/game_map.gd" id="1_2jv1c"]
+[ext_resource type="Script" uid="uid://bsunwvk2j2lji" path="res://game/maps/wall.gd" id="1_qpfm3"]
+[ext_resource type="PackedScene" uid="uid://c845e7trgcfb5" path="res://game/maps/wall.tscn" id="3_qpfm3"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_i3pt7"]
+
+[sub_resource type="Sky" id="Sky_qpfm3"]
+sky_material = SubResource("ProceduralSkyMaterial_i3pt7")
+
+[sub_resource type="Environment" id="Environment_2jv1c"]
+background_mode = 2
+sky = SubResource("Sky_qpfm3")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_i3pt7"]
+frequency = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_qpfm3"]
+noise = SubResource("FastNoiseLite_i3pt7")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2jv1c"]
+albedo_color = Color(0.83163285, 0.5279456, 0.28156093, 1)
+albedo_texture = SubResource("NoiseTexture2D_qpfm3")
+uv1_scale = Vector3(7.4, 7.4, 7.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1iw4v"]
+material = SubResource("StandardMaterial3D_2jv1c")
+size = Vector3(400, 1, 250)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qpfm3"]
+size = Vector3(400, 1, 250)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i3pt7"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_i3pt7"]
+material = SubResource("StandardMaterial3D_i3pt7")
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_qpfm3"]
+data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
+[node name="GameMap" type="Node3D"]
+script = ExtResource("1_2jv1c")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.91953367, -0.32665113, 0.21853356, -0.021116598, 0.5141814, 0.85742146, -0.3924436, -0.79304254, 0.46590936, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_2jv1c")
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.613785, 0)
+script = ExtResource("1_qpfm3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D2"]
+layers = 129
+mesh = SubResource("BoxMesh_1iw4v")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2"]
+shape = SubResource("BoxShape3D_qpfm3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(8.694796, 0, 0, 0, 9.38272, 0, 0, 0, 4.074828, -27.328098, 4.7448354, 51.496826)
+layers = 129
+mesh = SubResource("BoxMesh_i3pt7")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_qpfm3")
+
+[node name="StaticBody3D" parent="." instance=ExtResource("3_qpfm3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.023085, -0.053153753, 0.21590424)
+collision_layer = 1
+
+[node name="Team2" type="Node3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -151.06366, 4.9642653, 2.5036278)
+
+[node name="Marker3D" type="Marker3D" parent="Team2"]
+
+[node name="Marker3D2" type="Marker3D" parent="Team2"]
+
+[node name="Team1" type="Node3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 139.13559, 4.9642577, 4.2421722)
+
+[node name="Marker3D" type="Marker3D" parent="Team1"]
+
+[node name="Marker3D2" type="Marker3D" parent="Team1"]
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("SpawnRoot")
+
+[node name="SpawnRoot" type="Node3D" parent="MultiplayerSpawner"]
