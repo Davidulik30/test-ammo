@@ -3,13 +3,20 @@ extends Node3D
 # Spawns player tanks based on MatchState.players or root meta "lobby_players".
 # Expects team spawn nodes `Team1` and `Team2` each containing Marker3D children.
 
-const TANK_PATHS := {
-	"Tank": "res://game/tanks/tank.tscn",
-	"Predator": "res://game/tanks/predator/predator.tscn",
-	"LemanRuss": "res://game/tanks/lemanruss/lemanruss.tscn",
-	"Scouter": "res://game/tanks/scouter/scouter.tscn",
-	"default": "res://game/tanks/tank.tscn"
-}
+const DEFAULT_TANK_PATH := "res://game/tanks/tank.tscn"
+
+func _get_tank_scene_path(tank_name: String) -> String:
+	# Prefer TankRegistry if autoloaded
+	if Engine.get_main_loop().get_root().has_node("TankRegistry"):
+		var path = TankRegistry.get_tank_path(tank_name)
+		if path != "":
+			return path
+	# Fallback: try to build a path using common names
+	var guess = "res://game/tanks/%s/%s.tscn" % [tank_name.to_lower(), tank_name.to_lower()]
+	if ResourceLoader.exists(guess):
+		return guess
+	# final fallback
+	return DEFAULT_TANK_PATH
 
 func _ready() -> void:
 	var players: Dictionary = {}
@@ -54,13 +61,12 @@ func _ready() -> void:
 		# set spawn function so the engine will call _spawner_spawn_function on all peers
 		spawner.spawn_function = Callable(self, "_spawner_spawn_function")
 
-	var i := 0
 	var team1_idx := 0
 	var team2_idx := 0
 	for id in ids:
 		var info = players[id]
 		var tank_name = info.get("tank", null)
-		var scene_path: String = TANK_PATHS.get(tank_name, TANK_PATHS["default"])
+		var scene_path: String = _get_tank_scene_path(tank_name)
 
 		# Используем команду из данных игрока
 		var team: int = info.get("team", 1)
@@ -102,8 +108,6 @@ func _ready() -> void:
 						cam.current = true
 			else:
 				push_error("Failed to load tank scene: %s" % scene_path)
-
-		i += 1
 
 func _compare_ids(a, b):
 	# ensure numeric comparison where possible

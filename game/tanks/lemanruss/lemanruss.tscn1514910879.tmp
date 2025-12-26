@@ -53,10 +53,11 @@ turret = NodePath("TankModel/Tank/Body/Turret")
 barrel = NodePath("TankModel/Tank/Body/Turret/Barrel")
 explosion_root = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/Explosion")
 muzzle_audio = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/MuzzleAudio")
-sight_camera = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/SightCamera")
+sight_camera = NodePath("TankModel/Tank/Body/Turret/Barrel/SightCamera")
 regular_camera = NodePath("TankModel/Tank/Body/Turret/Barrel/RegularCamera")
 projectile_scene = ExtResource("2_pdeyu")
 projectile_damage = 40
+projectile_type = null
 spawn_shell = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell")
 max_health = 200
 shoot_force = 50.0
@@ -64,10 +65,31 @@ turret_rotation_speed = 60.0
 barrel_pitch_speed = 25.0
 max_barrel_angle_up = 20.0
 max_barrel_angle_down = -7.0
+engine_force_value = null
+turn_force_value = null
+brake_force_value = null
+camera_sensitivity = null
+camera_pitch_limits = null
 camera_distance = 15.0
 camera_focus_height = 5.0
 camera_height_offset = 5.0
+aim_ray_length = null
+sight_mouse_sensitivity = null
+sight_yaw_range_deg = null
+sight_pitch_up_deg = null
+sight_pitch_down_deg = null
+sight_invert_y = null
+sight_invert_x = null
+sight_turret_rotation_speed = null
+sight_barrel_pitch_speed = null
+show_zoom_label = null
 _zoom_label = NodePath("CanvasLayer/zoom")
+camera_min_distance = null
+camera_max_distance = null
+camera_zoom_step = null
+sight_min_fov = null
+sight_max_fov = null
+sight_fov_step = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
@@ -76,17 +98,13 @@ shape = SubResource("BoxShape3D_collision")
 [node name="TankModel" parent="." instance=ExtResource("4_model")]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 
-[node name="SightCamera" type="Camera3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="0"]
-transform = Transform3D(-0.25, 0, -2.1855694e-08, 0, 0.25, 0, 2.1855694e-08, 0, -0.25, 0.0030611884, 0.0015137792, 0.13923895)
-fov = 35.0
-
-[node name="spawn shell" type="Marker3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="1"]
+[node name="spawn shell" type="Marker3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="0"]
 transform = Transform3D(0, 0, -1, -1, 0, 0, 0, 1, 0, 0, 0, 0.251)
 
 [node name="Explosion" parent="TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell" instance=ExtResource("2_explosion")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.19999981, 0.0097234845)
 
-[node name="SightSpringArm" type="SpringArm3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="2" node_paths=PackedStringArray("marker_3d")]
+[node name="SightSpringArm" type="SpringArm3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="1" node_paths=PackedStringArray("marker_3d")]
 transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0.0030159485, 0.023919523, -0.058180094)
 collision_mask = 129
 shape = SubResource("SeparationRayShape3D_spring")
@@ -101,10 +119,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 visible = false
 mesh = SubResource("SphereMesh_marker")
 
-[node name="MuzzleAudio" type="AudioStreamPlayer3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="3"]
+[node name="MuzzleAudio" type="AudioStreamPlayer3D" parent="TankModel/Tank/Body/Turret/Barrel/Dulo" index="2"]
 stream = ExtResource("5_shot")
 
-[node name="RegularCamera" type="Camera3D" parent="TankModel/Tank/Body/Turret/Barrel" index="1"]
+[node name="SightCamera" type="Camera3D" parent="TankModel/Tank/Body/Turret/Barrel" index="1"]
+transform = Transform3D(-0.25, 0, -2.1855694e-08, 0, 0.25, 0, 2.1855694e-08, 0, -0.25, 0.009936655, -0.0065888762, -0.4167393)
+fov = 35.0
+
+[node name="RegularCamera" type="Camera3D" parent="TankModel/Tank/Body/Turret/Barrel" index="2"]
 transform = Transform3D(-0.25, 0, -2.1855694e-08, 0, 0.25, 0, 2.1855694e-08, 0, -0.25, 0.028002942, 1.449693, -4.131803)
 current = true
 

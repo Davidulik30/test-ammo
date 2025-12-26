@@ -13,7 +13,20 @@ extends Control
 @onready var status_label: Label = $StatusLabel
 
 # Доступные танки
-var tanks := ["Tank", "Predator", "LemanRuss", "Scouter"]
+var tanks := []
+
+func _refresh_tank_list() -> void:
+	# get names from TankRegistry autoload
+	if Engine.get_main_loop().get_root().has_node("TankRegistry"):
+		var names = TankRegistry.get_tank_names()
+		if names.size() > 0:
+			tanks = names
+			# rebuild buttons if UI already created
+			if is_inside_tree():
+				_build_tank_buttons()
+			return
+	# fallback default list
+	tanks = ["Tank", "Predator", "LemanRus", "Scouter"]
 var my_team: int = 0
 var my_tank: String = ""
 var is_ready: bool = false
@@ -30,6 +43,8 @@ func _ready() -> void:
 	else:
 		push_warning("NetworkManager Autoload не найден!")
 	
+	# Load tanks from TankRegistry (if available)
+	_refresh_tank_list()
 	# Создаём кнопки танков
 	_build_tank_buttons()
 	

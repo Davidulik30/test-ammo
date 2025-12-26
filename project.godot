@@ -19,6 +19,13 @@ config/icon="res://icon.svg"
 
 MatchState="*res://network/match_state.gd"
 NetworkManager="*res://network/network_manager.gd"
+TankRegistry="*res://game/tanks/tank_registry.gd"
+
+[file_customization]
+
+folder_colors={
+"res://game/tanks/ready_tanks/": "green"
+}
 
 [filesystem]
 

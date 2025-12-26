@@ -1,12 +1,15 @@
 extends SpringArm3D
 
 var sight_ray = self
-@onready var aim: TextureRect = $"../../../../../../../CanvasLayer/aim"
+@export var aim: TextureRect
+@export var sightaim: TextureRect
+@export var crosshair: TextureRect
 @export var marker_3d: Marker3D
-@onready var crosshair: TextureRect = $"../../../../../../../CanvasLayer/crosshair"
 
 
-@export var hide = false
+
+@export var hide_ui: bool = false
+
 
 func _ready() -> void:
 	if not is_multiplayer_authority():
@@ -17,8 +20,13 @@ func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 func _process(delta: float) -> void:
-	
-	if hide:self.hide 
+	if hide_ui:
+		# hide UI elements when requested
+		if is_instance_valid(aim):
+			aim.visible = false
+		if is_instance_valid(crosshair):
+			crosshair.visible = false
+		return
 	_update_aim_position()
 	_update_crosshair_to_mouse_position()
 
@@ -28,7 +36,8 @@ func _update_crosshair_to_mouse_position() -> void:
 	
 	# Устанавливаем позицию нашего 2D-прицела.
 	# Вычитаем половину его размера, чтобы центр прицела был в точке курсора.
-	crosshair.position = mouse_pos - crosshair.size / 2.0
+	if is_instance_valid(crosshair):
+		crosshair.position = mouse_pos - crosshair.size / 2.0
 	
 func _update_aim_position() -> void:
 	var camera: Camera3D = get_viewport().get_camera_3d()

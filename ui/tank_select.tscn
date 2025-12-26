@@ -16,6 +16,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Title" type="Label" parent="."]
 layout_mode = 1
@@ -26,8 +28,9 @@ offset_left = -100.0
 offset_top = 20.0
 offset_right = 100.0
 offset_bottom = 50.0
-horizontal_alignment = 1
+grow_horizontal = 2
 text = "Выбор команды и танка"
+horizontal_alignment = 1
 
 [node name="TeamsContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -38,6 +41,8 @@ offset_left = 50.0
 offset_top = 70.0
 offset_right = -50.0
 offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Team1Panel" type="PanelContainer" parent="TeamsContainer"]
 layout_mode = 2
@@ -93,6 +98,8 @@ offset_left = 50.0
 offset_top = -100.0
 offset_right = -50.0
 offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="TankSelectPanel" type="VBoxContainer" parent="BottomPanel"]
 layout_mode = 2
@@ -120,5 +127,7 @@ anchor_bottom = 1.0
 offset_left = -100.0
 offset_top = -20.0
 offset_right = 100.0
-horizontal_alignment = 1
+grow_horizontal = 2
+grow_vertical = 0
 text = "Ожидание игроков..."
+horizontal_alignment = 1

@@ -1,3 +1,4 @@
+class_name projectile
 extends RigidBody3D
 
 
