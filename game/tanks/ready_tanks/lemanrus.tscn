@@ -1,12 +1,27 @@
-[gd_scene load_steps=13 format=3 uid="uid://blmece8g5bmvf"]
+[gd_scene load_steps=17 format=3 uid="uid://blmece8g5bmvf"]
 
 [ext_resource type="Script" uid="uid://dd6g1oxq7s448" path="res://game/tanks/tank.gd" id="1_j8din"]
+[ext_resource type="Script" uid="uid://du4vhiyjx5a8b" path="res://game/projectiles/shell_type.gd" id="2_frvbd"]
+[ext_resource type="Texture2D" uid="uid://byaibv2y1png1" path="res://icon.svg" id="3_18we6"]
 [ext_resource type="PackedScene" uid="uid://d3liv7o7emfgk" path="res://game/tanks/lemanruss/TankForEdit.glb" id="3_srpif"]
 [ext_resource type="PackedScene" uid="uid://r0865144f5kj" path="res://game/effects/explosion.tscn" id="4_wh0gw"]
 [ext_resource type="AudioStream" uid="uid://17na1n3uq2b3" path="res://game/effects/tank_shot.mp3" id="5_t2e0i"]
 [ext_resource type="Script" uid="uid://tra820eah0nk" path="res://game/tanks/gun_direction.gd" id="6_ptg8l"]
 [ext_resource type="PackedScene" uid="uid://c1hou6p0knntg" path="res://game/tanks/default_tank_UI.tscn" id="7_1dqpg"]
-[ext_resource type="Script" uid="uid://byeb1g4erunox" path="res://game/tanks/tank_ui.gd" id="10_dse1x"]
+
+[sub_resource type="Resource" id="Resource_dse1x"]
+script = ExtResource("2_frvbd")
+display_name = "Shell1"
+icon = ExtResource("3_18we6")
+metadata/_custom_type_script = "uid://du4vhiyjx5a8b"
+
+[sub_resource type="Resource" id="Resource_frvbd"]
+script = ExtResource("2_frvbd")
+metadata/_custom_type_script = "uid://du4vhiyjx5a8b"
+
+[sub_resource type="Resource" id="Resource_18we6"]
+script = ExtResource("2_frvbd")
+metadata/_custom_type_script = "uid://du4vhiyjx5a8b"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_collision"]
 size = Vector3(3.5, 1.2, 6)
@@ -49,6 +64,9 @@ explosion_root = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/Ex
 muzzle_audio = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/MuzzleAudio")
 sight_camera = NodePath("SightCamera")
 regular_camera = NodePath("RegularCamera")
+shell_types = Array[ExtResource("2_frvbd")]([SubResource("Resource_dse1x"), SubResource("Resource_frvbd"), SubResource("Resource_18we6")])
+projectile_damage = null
+projectile_type = null
 spawn_shell = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell")
 max_health = 200
 shoot_force = 50.0
@@ -58,11 +76,30 @@ barrel_pitch_speed = 25.0
 max_barrel_angle_up = 20.0
 max_barrel_angle_down = -7.0
 reload_time = 4.0
+engine_force_value = null
+turn_force_value = null
+brake_force_value = null
+camera_sensitivity = null
+camera_pitch_limits = null
 camera_distance = 15.0
 camera_focus_height = 1.0
 camera_height_offset = 5.0
+aim_ray_length = null
 sight_mouse_sensitivity = 0.001
 sight_yaw_range_deg = 360.0
+sight_pitch_up_deg = null
+sight_pitch_down_deg = null
+sight_invert_y = null
+sight_invert_x = null
+sight_turret_rotation_speed = null
+sight_barrel_pitch_speed = null
+show_zoom_label = null
+camera_min_distance = null
+camera_max_distance = null
+camera_zoom_step = null
+sight_min_fov = null
+sight_max_fov = null
+sight_fov_step = null
 
 [node name="SightCamera" type="Camera3D" parent="."]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -0.009334326, 3.1647477, 0.0061159134)
@@ -114,26 +151,13 @@ use_as_traction = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.48835003, 0)
 use_as_traction = true
 
-[node name="TankUI" parent="." instance=ExtResource("7_1dqpg")]
-script = ExtResource("10_dse1x")
-
-[node name="aim" parent="TankUI" index="0"]
-metadata/_edit_use_anchors_ = true
-
-[node name="sightaim" parent="TankUI" index="1"]
-visible = false
-
-[node name="crosshair" parent="TankUI" index="2"]
-metadata/_edit_use_anchors_ = true
-
-[node name="zoom" parent="TankUI" index="3"]
-visible = true
-
-[node name="ReloadLabel" parent="TankUI" index="4"]
-visible = true
-
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_pdeyu")
+
+[node name="TankUI" parent="." instance=ExtResource("7_1dqpg")]
+
+[node name="Control" parent="TankUI" index="0"]
+metadata/_edit_use_anchors_ = true
 
 [editable path="TankModel"]
 [editable path="TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/Explosion"]

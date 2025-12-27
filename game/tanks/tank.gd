@@ -16,9 +16,7 @@ extends VehicleBody3D
 @export var regular_camera: Camera3D
 
 @export_group("Projectile")
-@export var projectile_scene: PackedScene
-@export var projectile_damage: int = 25
-@export var projectile_type: int = 0
+@export var shell_types:Array[ShellType]
 @export var spawn_shell: Marker3D
 @export_group("Stats")
 @export var max_health: int = 100
@@ -68,7 +66,6 @@ var crosshair: TextureRect
 @export_group("Zoom")
 @export var _zoom_label: Label = null
 var _reload_label: Label = null
-var _network_manager: Node = null
 @export var camera_min_distance: float = 6.0
 @export var camera_max_distance: float = 20.0
 @export var camera_zoom_step: float = 1.0
@@ -85,8 +82,6 @@ var exposive
 var _camera_yaw: float = 0.0
 var _camera_pitch: float = deg_to_rad(10.0)
 var _aim_target_world: Vector3 = Vector3.ZERO
-var sight_offset_yaw: float = 0.0
-var sight_offset_pitch: float = 0.0
 var sight_camera_yaw: float = 0.0
 var sight_camera_pitch: float = 0.0
 var sight_camera_base_yaw: float = 0.0
@@ -307,22 +302,14 @@ func _get_camera_direction() -> Vector3:
 
 func _get_direction_from_camera(camera: Camera3D) -> Vector3:
 	if camera == null:
-		# fallback to tank-forward
 		return -global_transform.basis.z
 	if camera == regular_camera:
-		var yaw_basis = _camera_yaw
-		var pitch_basis = _camera_pitch
-		if regular_camera == null:
-			yaw_basis = rotation.y
-			pitch_basis = 0.0
-		var cos_pitch = cos(pitch_basis)
+		var cos_pitch = cos(_camera_pitch)
 		return Vector3(
-			sin(yaw_basis) * cos_pitch,
-			sin(pitch_basis),
-			-cos(yaw_basis) * cos_pitch
+			sin(_camera_yaw) * cos_pitch,
+			sin(_camera_pitch),
+			-cos(_camera_yaw) * cos_pitch
 		).normalized()
-	# sight camera: use its own forward vector plus offsets
-	# sight camera: just use its forward vector (we rotate camera directly in sight mode)
 	return (-camera.global_transform.basis.z).normalized()
 
 
@@ -512,22 +499,23 @@ func _update_turret_tracking(delta: float) -> void:
 	barrel.rotation.x = clamp(current_pitch + pitch_delta, pitch_min, pitch_max)
 
 
-func play_muzzle_fx():
-	if dots:
-		dots.restart()
-		dots.emitting = true
-	if smoke:
-		smoke.restart()
-		smoke.emitting = true
-	if fire:
-		fire.restart()
-		fire.emitting = true
-	if exposive:
-		exposive.stop()
-		exposive.play()
-	if muzzle_audio:
-		muzzle_audio.stop()
-		muzzle_audio.play()
+func play_muzzle_fx() -> void:
+	_emit_particle(dots)
+	_emit_particle(smoke)
+	_emit_particle(fire)
+	_play_audio(exposive)
+	_play_audio(muzzle_audio)
+
+func _emit_particle(p: GPUParticles3D) -> void:
+	if p:
+		p.restart()
+		p.emitting = true
+
+func _play_audio(a: Node) -> void:
+	if a and a.has_method("play"):
+		if a.has_method("stop"):
+			a.stop()
+		a.play()
 
 
 # Reload helpers
@@ -535,38 +523,25 @@ func is_reloading() -> bool:
 	return _is_reloading
 
 func _start_reload() -> void:
-	# Non-blocking reload with visible countdown for local owner
-	if reload_time <= 0.0:
-		return
-	if _is_reloading:
+	if reload_time <= 0.0 or _is_reloading:
 		return
 	_is_reloading = true
-
 	_ensure_reload_label()
-
-	# Non-owners should not show the countdown but we still honor reload time
-	if not _is_locally_controlled():
-		await get_tree().create_timer(reload_time).timeout
-		_is_reloading = false
-		return
-
-	# Show countdown and update every 0.1s
-	if _reload_label:
+	
+	var show_ui := _is_locally_controlled() and _reload_label != null
+	if show_ui:
 		_reload_label.visible = true
+	
+	# Update countdown every 0.1s
 	var remaining := reload_time
-	var step := 0.1
+	const STEP := 0.1
 	while remaining > 0.0:
-		if _reload_label:
-			_reload_label.text = "Reload: %.1fs" % [max(0.0, remaining)]
-			# yield a small step
-			await get_tree().create_timer(step).timeout
-			remaining -= step
-		else:
-			# if no label, just wait the full duration
-			await get_tree().create_timer(remaining).timeout
-			break
-
-	if _reload_label:
+		if show_ui:
+			_reload_label.text = "Reload: %.1fs" % remaining
+		await get_tree().create_timer(STEP).timeout
+		remaining -= STEP
+	
+	if show_ui:
 		_reload_label.visible = false
 		_reload_label.text = ""
 	_is_reloading = false
@@ -580,23 +555,16 @@ func _wrap_angle(x: float) -> float:
 	return y - PI
 
 
-func _set_model_visible(visible: bool) -> void:
-	# Recursively toggle visibility of all VisualInstance3D under the body node
-	if body == null:
-		return
-	_recursive_set_visible(body, visible)
+func _set_model_visible(is_visible: bool) -> void:
+	if body:
+		_recursive_set_visible(body, is_visible)
 
 
-func _recursive_set_visible(node: Node, visible: bool) -> void:
+func _recursive_set_visible(node: Node, is_visible: bool) -> void:
 	if node is VisualInstance3D:
-		node.visible = visible
+		node.visible = is_visible
 	for child in node.get_children():
-		if child is Node:
-			_recursive_set_visible(child, visible)
-
-
-func explosion():
-	play_muzzle_fx()
+		_recursive_set_visible(child, is_visible)
 
 
 func toggle_camera() -> void:
@@ -606,10 +574,6 @@ func toggle_camera() -> void:
 		sight_camera.make_current()
 		if sightaim:
 			sightaim.show()
-		# reset sight offsets when entering sight mode
-		sight_offset_yaw = 0.0
-		sight_offset_pitch = 0.0
-		# initialize sight base yaw for limited free rotation relative to hull
 		_init_sight_camera_orientation()
 		# hide local model for sight view on the owning client
 		if _is_locally_controlled():
@@ -705,21 +669,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _is_locally_controlled() -> bool:
-	# Determine if this node is controlled by this peer
-	var mp = get_tree().get_multiplayer()
-	var my_id = mp.get_unique_id()
-	# try modern API
-	if has_method("get_multiplayer_authority"):
-		# prefer direct call to avoid stringly-typed call()
-		var auth = int(get_multiplayer_authority())
-		# debug helper (can be removed later)
-		#print("[Tank] my_id=", my_id, " auth=", auth)
-		return auth == int(my_id)
-	# fallback to older API if present
-	if has_method("get_network_master"):
-		return int(get_multiplayer_authority()) == int(my_id)
-	# if no networking API available, treat as local-controlled (singleplayer)
-	return true
+	# In Godot 4.x all nodes have get_multiplayer_authority()
+	return get_multiplayer_authority() == get_tree().get_multiplayer().get_unique_id()
 
 
 func _apply_recoil(direction: Vector3) -> void:
@@ -733,10 +684,8 @@ func _apply_recoil(direction: Vector3) -> void:
 	apply_central_impulse(impulse)
 
 @rpc("call_local")
-func rpc_apply_damage(amount: int, from_id: int) -> void:
-	# Apply damage locally (called by server broadcast)
-	health -= int(amount)
+func rpc_apply_damage(amount: int, _from_id: int) -> void:
+	health -= amount
 	if health <= 0:
-		print("[Tank] destroyed")
-		explosion()
+		play_muzzle_fx()
 		queue_free()
