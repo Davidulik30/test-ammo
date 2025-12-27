@@ -89,6 +89,7 @@ var health: int = 0
 
 # Перезарядка
 var _is_reloading: bool = false
+var _current_shell_index: int = 0
 
 func _init_sight_camera_orientation() -> void:
 	if sight_camera == null:
@@ -165,6 +166,13 @@ func _ready() -> void:
 	# Initialize health for everyone
 	health = max_health
 
+	# Инициализируем текущий тип снаряда и оповещаем UI
+	if shell_types.size() > 0:
+		_current_shell_index = clamp(_current_shell_index, 0, shell_types.size() - 1)
+		_on_shell_changed()
+	else:
+		push_warning("[Tank] shell_types is empty; no shells available")
+
 	# If this tank is not owned by this peer, disable input/UI and cameras.
 	if not _is_locally_controlled():
 		_configure_remote_view()
@@ -232,6 +240,31 @@ func _resolve_required_nodes() -> void:
 			reload_label = canvas_layer.get_node("ReloadLabel") as Label
 
 
+func _get_current_shell() -> ShellType:
+	if shell_types.is_empty():
+		return null
+	if _current_shell_index < 0 or _current_shell_index >= shell_types.size():
+		return shell_types[0]
+	return shell_types[_current_shell_index]
+
+
+func _set_shell(index: int) -> void:
+	if index < 0 or index >= shell_types.size():
+		return
+	if _current_shell_index == index:
+		return
+	_current_shell_index = index
+	
+	print("shell changed to: ",shell_types[index] )
+	_on_shell_changed()
+
+
+func _on_shell_changed() -> void:
+	# Оповещаем TankUI о смене снаряда, если там есть метод change_shell
+	if canvas_layer and canvas_layer.has_method("change_shell"):
+		canvas_layer.change_shell(_current_shell_index)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	# Only the local owner should process input events
 	if not _is_locally_controlled():
@@ -251,6 +284,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				_zoom_wheel(true)
 			elif event.button_index == 5:
 				_zoom_wheel(false)
+	elif event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_1:
+				_set_shell(0)
+			KEY_2:
+				_set_shell(1)
+			KEY_3:
+				_set_shell(2)
+			KEY_4:
+				_set_shell(3)
 
 
 func _rotate_camera(relative: Vector2) -> void:
@@ -643,15 +686,26 @@ func _physics_process(delta: float) -> void:
 		if _is_reloading:
 			# TODO: play 'empty' click or UI hint
 			return
-		# Only the owner triggers firing: request server to spawn authoritative projectile
-		var scene_path := projectile_scene.resource_path if projectile_scene and projectile_scene.resource_path != "" else "res://game/projectiles/shell.tscn"
+		# Выбираем текущий тип снаряда
+		var shell_def: ShellType = _get_current_shell()
+		if shell_def == null:
+			push_warning("[Tank] No current shell defined; shot ignored")
+			return
+		# Путь до сцены снаряда (по умолчанию один и тот же префаб)
+		var scene_path: String = "res://game/projectiles/shell.tscn"
+		if SHELL and SHELL.resource_path != "":
+			scene_path = SHELL.resource_path
+		# Параметры из ShellType
+		var proj_type: int = shell_def.projectile_type
+		var proj_speed: float = shell_def.speed
+		var proj_damage: int = int(shell_def.damage)
 		# compute spawn transform and firing direction (forward from spawn marker)
 		var spawn_xform = spawn_shell.global_transform
 		var direction = spawn_xform.basis.y
 		var network_manager := NetworkManager
 		if network_manager:
 			var server_id = network_manager.get_server_id()
-			network_manager.rpc_id(server_id, "server_spawn_projectile", scene_path, get_tree().get_multiplayer().get_unique_id(), spawn_xform, projectile_type, shoot_force, projectile_damage)
+			network_manager.rpc_id(server_id, "server_spawn_projectile", scene_path, get_tree().get_multiplayer().get_unique_id(), spawn_xform, proj_type, proj_speed, proj_damage)
 			# immediate local feedback: muzzle fx + recoil; server will spawn authoritative projectile
 			play_muzzle_fx()
 			_apply_recoil(direction)
@@ -662,7 +716,10 @@ func _physics_process(delta: float) -> void:
 			var ammo = SHELL.instantiate()
 			get_tree().root.add_child(ammo)
 			ammo.global_transform = spawn_shell.global_transform
-			ammo._set_speed(direction * shoot_force)
+			# задаем параметры по ShellType
+			if ammo.has_variable("damage"):
+				ammo.damage = proj_damage
+			ammo._set_speed(direction * proj_speed)
 			# apply recoil locally and start reload after local spawn
 			_apply_recoil(direction)
 			_start_reload()

@@ -65,8 +65,6 @@ muzzle_audio = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/Muzz
 sight_camera = NodePath("SightCamera")
 regular_camera = NodePath("RegularCamera")
 shell_types = Array[ExtResource("2_frvbd")]([SubResource("Resource_dse1x"), SubResource("Resource_frvbd"), SubResource("Resource_18we6")])
-projectile_damage = null
-projectile_type = null
 spawn_shell = NodePath("TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell")
 max_health = 200
 shoot_force = 50.0
@@ -76,30 +74,11 @@ barrel_pitch_speed = 25.0
 max_barrel_angle_up = 20.0
 max_barrel_angle_down = -7.0
 reload_time = 4.0
-engine_force_value = null
-turn_force_value = null
-brake_force_value = null
-camera_sensitivity = null
-camera_pitch_limits = null
 camera_distance = 15.0
 camera_focus_height = 1.0
 camera_height_offset = 5.0
-aim_ray_length = null
 sight_mouse_sensitivity = 0.001
 sight_yaw_range_deg = 360.0
-sight_pitch_up_deg = null
-sight_pitch_down_deg = null
-sight_invert_y = null
-sight_invert_x = null
-sight_turret_rotation_speed = null
-sight_barrel_pitch_speed = null
-show_zoom_label = null
-camera_min_distance = null
-camera_max_distance = null
-camera_zoom_step = null
-sight_min_fov = null
-sight_max_fov = null
-sight_fov_step = null
 
 [node name="SightCamera" type="Camera3D" parent="."]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -0.009334326, 3.1647477, 0.0061159134)
@@ -158,6 +137,9 @@ replication_config = SubResource("SceneReplicationConfig_pdeyu")
 
 [node name="Control" parent="TankUI" index="0"]
 metadata/_edit_use_anchors_ = true
+
+[node name="sightaim" parent="TankUI" index="2"]
+visible = false
 
 [editable path="TankModel"]
 [editable path="TankModel/Tank/Body/Turret/Barrel/Dulo/spawn shell/Explosion"]

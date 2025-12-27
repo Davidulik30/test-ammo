@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://c1hou6p0knntg"]
+[gd_scene load_steps=8 format=3 uid="uid://c1hou6p0knntg"]
 
 [ext_resource type="Texture2D" uid="uid://phy5udglf7s2" path="res://game/tanks/textures/default_tank_sightaim.tres" id="1_2ed40"]
 [ext_resource type="Script" uid="uid://igtyukh40spv" path="res://game/tanks/default_tank_ui.gd" id="1_aa5ga"]
+[ext_resource type="Texture2D" uid="uid://byaibv2y1png1" path="res://icon.svg" id="3_qfpks"]
 
 [sub_resource type="Gradient" id="Gradient_aim"]
 offsets = PackedFloat32Array(0.49174917, 0.5247525, 0.70957094)
@@ -137,3 +138,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
+
+[node name="TextureRect" type="TextureRect" parent="Ammocontainer"]
+layout_mode = 2
+texture = ExtResource("3_qfpks")
