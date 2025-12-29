@@ -1,4 +1,7 @@
 extends VehicleBody3D
+
+const SideGunConfig = preload("res://game/tanks/side_gun_config.gd")
+
 @export_group("Nodes")
 @export var body: Node3D
 @export var turret: Node3D
@@ -33,13 +36,17 @@ var crosshair: TextureRect
 
 
 @export_group("Gun")
-@export var shoot_force: float = 100.0
 @export var recoil_force: float = 200.0 # Сила отдачи, применяется к корпусу танка при выстреле (в единицах импульса)
 @export var turret_rotation_speed: float = 30.0 # Скорость поворота башни в градусах/сек
 @export var barrel_pitch_speed: float = 10.0    # Скорость подъема ствола в градусах/сек
 @export var max_barrel_angle_up: float = 15.0
 @export var max_barrel_angle_down: float = -5.0
 @export var reload_time: float = 1.5 # Время перезарядки (сек)
+
+@export_group("Side Guns")
+@export var side_guns: Array[SideGunConfig] = []
+var _side_guns_runtime: Array = []
+
 @export_group("Movement")
 @export var engine_force_value: float = 15000.0
 @export var turn_force_value: float = 12000.0
@@ -52,6 +59,7 @@ var crosshair: TextureRect
 @export var camera_focus_height: float = 2.5
 @export var camera_height_offset: float = 2.5
 @export var aim_ray_length: float = 500.0
+
 @export_group("Sight")
 @export var sight_mouse_sensitivity: float = 0.004
 @export var sight_yaw_range_deg: float = 30.0
@@ -61,6 +69,8 @@ var crosshair: TextureRect
 @export var sight_invert_x: bool = false
 @export var sight_turret_rotation_speed: float = 20.0
 @export var sight_barrel_pitch_speed: float = 8.0
+
+
 
 @export var show_zoom_label: bool = true
 @export_group("Zoom")
@@ -146,6 +156,7 @@ func _configure_local_view() -> void:
 
 func _ready() -> void:
 	_resolve_required_nodes()
+	_resolve_side_guns()
 	# Проверяем что turret и barrel найдены
 	if turret == null:
 		push_error("[Tank] turret не найден по пути $body/turret!")
@@ -238,6 +249,33 @@ func _resolve_required_nodes() -> void:
 		# If author placed a ReloadLabel in CanvasLayer, use it
 		if reload_label == null and canvas_layer.has_node("ReloadLabel"):
 			reload_label = canvas_layer.get_node("ReloadLabel") as Label
+
+
+func _resolve_side_guns() -> void:
+	_side_guns_runtime.clear()
+	for cfg in side_guns:
+		if cfg == null:
+			continue
+		if cfg.gun_path == NodePath(""):
+			continue
+		if not has_node(cfg.gun_path):
+			push_warning("[Tank] Side gun path not found: " + str(cfg.gun_path))
+			continue
+		var gun := get_node(cfg.gun_path) as Node3D
+		if gun == null:
+			push_warning("[Tank] Side gun is not a Node3D: " + str(cfg.gun_path))
+			continue
+		_side_guns_runtime.append({
+			"gun": gun,
+			"base_yaw": gun.rotation.y,
+			"base_pitch": gun.rotation.x,
+			"yaw_left": deg_to_rad(max(cfg.yaw_left_limit_deg, 0.0)),
+			"yaw_right": deg_to_rad(max(cfg.yaw_right_limit_deg, 0.0)),
+			"pitch_up": deg_to_rad(max(cfg.pitch_up_limit_deg, 0.0)),
+			"pitch_down": deg_to_rad(max(cfg.pitch_down_limit_deg, 0.0)),
+			"rot_speed": cfg.rotation_speed_deg,
+			"pitch_speed": cfg.pitch_speed_deg,
+		})
 
 
 func _get_current_shell() -> ShellType:
@@ -540,6 +578,45 @@ func _update_turret_tracking(delta: float) -> void:
 	var max_pitch_step = deg_to_rad(pitch_speed) * delta
 	var pitch_delta = clamp(diff_pitch, -max_pitch_step, max_pitch_step)
 	barrel.rotation.x = clamp(current_pitch + pitch_delta, pitch_min, pitch_max)
+
+	_update_side_guns(direction_world, delta)
+
+
+func _update_side_guns(direction_world: Vector3, delta: float) -> void:
+	# Drive auxiliary guns toward the main aim direction, clamped by per-gun limits.
+	for cfg in _side_guns_runtime:
+		var gun: Node3D = cfg.get("gun")
+		if gun == null or not is_instance_valid(gun):
+			continue
+		var parent_basis: Basis
+		if gun.get_parent():
+			parent_basis = gun.get_parent().global_transform.basis
+		else:
+			parent_basis = global_transform.basis
+		var local_dir = (parent_basis.inverse() * direction_world).normalized()
+		if local_dir.length() < 0.001:
+			continue
+		var desired_yaw = atan2(local_dir.x, local_dir.z)
+		var flat_len = max(0.001, Vector2(local_dir.x, local_dir.z).length())
+		var desired_pitch = atan2(-local_dir.y, flat_len)
+
+		var yaw_min = cfg["base_yaw"] - cfg["yaw_left"]
+		var yaw_max = cfg["base_yaw"] + cfg["yaw_right"]
+		var pitch_min = cfg["base_pitch"] - cfg["pitch_down"]
+		var pitch_max = cfg["base_pitch"] + cfg["pitch_up"]
+
+		var yaw_step = deg_to_rad(cfg["rot_speed"]) * delta
+		var pitch_step = deg_to_rad(cfg["pitch_speed"]) * delta
+
+		var current_yaw = gun.rotation.y
+		var target_yaw = clamp(desired_yaw, yaw_min, yaw_max)
+		var yaw_delta = clamp(_wrap_angle(target_yaw - current_yaw), -yaw_step, yaw_step)
+		gun.rotation.y = current_yaw + yaw_delta
+
+		var current_pitch = gun.rotation.x
+		var target_pitch = clamp(desired_pitch, pitch_min, pitch_max)
+		var pitch_delta = clamp(target_pitch - current_pitch, -pitch_step, pitch_step)
+		gun.rotation.x = current_pitch + pitch_delta
 
 
 func play_muzzle_fx() -> void:
